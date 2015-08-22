@@ -17,9 +17,9 @@
    <widget class="QLCDNumber" name="error_count">
     <property name="geometry">
      <rect>
-      <x>610</x>
+      <x>600</x>
       <y>30</y>
-      <width>91</width>
+      <width>101</width>
       <height>41</height>
      </rect>
     </property>
@@ -29,7 +29,7 @@
      <rect>
       <x>20</x>
       <y>30</y>
-      <width>91</width>
+      <width>101</width>
       <height>41</height>
      </rect>
     </property>
@@ -50,7 +50,7 @@
      <bool>false</bool>
     </property>
     <property name="text">
-     <string>TextLabel</string>
+     <string/>
     </property>
     <property name="alignment">
      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
@@ -121,6 +121,58 @@
      </rect>
     </property>
    </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>620</x>
+      <y>10</y>
+      <width>62</width>
+      <height>15</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Ошибки</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>410</x>
+      <y>10</y>
+      <width>131</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Лучшая скорость</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_3">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>10</y>
+      <width>141</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Средняя скорость</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_4">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>10</y>
+      <width>62</width>
+      <height>15</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Время</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -135,14 +187,6 @@
     <property name="title">
      <string>Файл</string>
     </property>
-    <widget class="QMenu" name="menu_2">
-     <property name="title">
-      <string>Пользователь</string>
-     </property>
-     <addaction name="actionSmok"/>
-    </widget>
-    <addaction name="action"/>
-    <addaction name="menu_2"/>
    </widget>
    <widget class="QMenu" name="menu_3">
     <property name="title">
@@ -167,9 +211,12 @@
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="action">
+  <action name="openFile">
    <property name="text">
     <string>Открыть</string>
+   </property>
+   <property name="softKeyRole">
+    <enum>QAction::NoSoftKey</enum>
    </property>
   </action>
   <action name="actionSmok">

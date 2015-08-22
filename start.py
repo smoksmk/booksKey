@@ -7,14 +7,37 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from PyQt4.uic import *
 from string import split
+import locale
+print locale.getpreferredencoding() # 'cp1251' - для win rus
 
 text_frag1 = u"""гагара арара мамалыга гагаузы татары Кака нанайцы алидада
 Мимино бибигон Титикака тамтам Арарат прапрадед кукушка Вовочка чеченцы
 татами гогот хохот кваква кокотка кокошник папаха цаца бугага кукуруза
 Лубумбаши уксусу ромбабаы"""
+class AddBookWindow(QWidget):
+    def __init__(self, parent=None):
+        super(AddBookWindow, self).__init__(parent)
+        self.setWindowFlags(Qt.Dialog | Qt.WindowSystemMenuHint)
+        self.setWindowModality(Qt.WindowModal)
+        self.window = loadUi("addBook.ui")
+        self.window.buttonBox.clicked.connect(self.close)
+        self.window.show()
+        print u"работает"
+
+    def openFile(self, filename):
+        print filename
+        file = open(filename)
+        data = file.read()
+        #print data
+        data1 = data.decode('utf8')
+        #self.text = unicode(data ,'utf-8')
+        self.text = re.sub("\n", " ", data1)#убераем все переводы коретки
+        self.window.textEdit.setText(self.text)
+        #print data
 
 class MainWindow(QWidget):
-    def __init__(self):
+    def __init__(self, parent=None):
+        super(MainWindow, self).__init__(parent)
         QWidget.__init__(self)
         self.text_frag = re.sub("\n", " ", text_frag1)#убераем все переводы коретки
         self.old_text = ""#текст котороый мы уже напечатали
@@ -32,7 +55,13 @@ class MainWindow(QWidget):
         self.window = loadUi("gui_key.ui")
         self.window.main_label.setText(self.text_frag)
         self.window.lineEdit.textChanged.connect(self.line_edit_text_changed)
-       # self.window.time.display(time.time())
+        #self.connect(self.menubar.openFile, SIGNAL('triggered()'), self.showDialog)
+        open_file = QAction(QIcon('open.png'), u'Открыть', self)
+        open_file.setShortcut('Ctrl+O')
+        open_file.setStatusTip('Открыть новый файл')
+
+        self.connect(open_file, SIGNAL('triggered()'), self.showDialog)
+        self.window.menu.addAction(open_file)
         self.window.show()
 
     def line_edit_text_changed(self, text): #обработка нажатий клавиш
@@ -66,11 +95,11 @@ class MainWindow(QWidget):
 
     def andText(self):
           # говрим об окончании текста
-            text_finish = u"<center>текст окончен</center> Среднаяя скорость %s"%self.netto
-            self.window.main_label.setText(text_finish)
-            self.old_text = self.old_text + self.text
-            self.word_count = self.word_count + 1
-            self.window.lineEdit.setText("")
+        text_finish = u"<center>текст окончен</center> Среднаяя скорость %s"%self.netto
+        self.window.main_label.setText(text_finish)
+        self.old_text = self.old_text + self.text
+        self.word_count = self.word_count + 1
+        self.window.lineEdit.setText("")
 
     def averageSpeed(self, timer):
         if self.i == 1:
@@ -86,13 +115,18 @@ class MainWindow(QWidget):
 
     def clearWord(self):
 
+        self.old_text = self.old_text + self.text
+        self.word_count = self.word_count + 1
+        self.window.lineEdit.setText("")
 
-            # self.key_tupe = self.key_tupe+1
-            self.old_text = self.old_text + self.text
-            self.word_count = self.word_count + 1
-            self.window.lineEdit.setText("")
+    def showDialog(self):
+        filename = QFileDialog.getOpenFileName(self, 'Open file', '/home')
+        textBook=AddBookWindow(self)
+        textBook.openFile(filename)
+        print filename
+        #textBook.text(filename)
 
 app = QApplication(sys.argv)
 mw = MainWindow()
 app.exec_()
-__author__ = 'smok'
+__author__ = 'smoksmk'
