@@ -3,6 +3,7 @@
 import sys
 import re
 import time
+import os.path
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from PyQt4.uic import *
@@ -16,24 +17,33 @@ text_frag1 = u"""гагара арара мамалыга гагаузы тат�
 Лубумбаши уксусу ромбабаы"""
 class AddBookWindow(QWidget):
     def __init__(self, parent=None):
+        self.defaultSumbol = 500
         super(AddBookWindow, self).__init__(parent)
         self.setWindowFlags(Qt.Dialog | Qt.WindowSystemMenuHint)
         self.setWindowModality(Qt.WindowModal)
         self.window = loadUi("addBook.ui")
         self.window.buttonBox.clicked.connect(self.close)
         self.window.show()
-        print u"работает"
 
     def openFile(self, filename):
-        print filename
+        #print filename
         file = open(filename)
         data = file.read()
+        file = unicode(filename)
+        (dirName, fileName1) = os.path.split(file)#извеняйте у меня кризис на названия переменных
         #print data
         data1 = data.decode('utf8')
         #self.text = unicode(data ,'utf-8')
         self.text = re.sub("\n", " ", data1)#убераем все переводы коретки
+        sumbol = len(data)
+        self.window.lineEdit.setText(str(self.defaultSumbol))
+        self.window.fileName.setText(fileName1)
+        self.window.simbol.setText(str(sumbol))
         self.window.textEdit.setText(self.text)
-        #print data
+        passageInt = self.defaultSumbol//sumbol
+
+        self.window.passage.setText(str(passageInt))
+
 
 class MainWindow(QWidget):
     def __init__(self, parent=None):
@@ -122,7 +132,8 @@ class MainWindow(QWidget):
     def showDialog(self):
         filename = QFileDialog.getOpenFileName(self, 'Open file', '/home')
         textBook=AddBookWindow(self)
-        textBook.openFile(filename)
+        filename1 = filename.decode('utf8')
+        textBook.openFile(filename1)
         print filename
         #textBook.text(filename)
 
