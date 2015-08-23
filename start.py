@@ -10,6 +10,8 @@ from PyQt4.uic import *
 from string import split
 import locale
 print locale.getpreferredencoding() # 'cp1251' - для win rus
+reload(sys)
+sys.setdefaultencoding('utf8')
 
 text_frag1 = u"""гагара арара мамалыга гагаузы татары Кака нанайцы алидада
 Мимино бибигон Титикака тамтам Арарат прапрадед кукушка Вовочка чеченцы
@@ -18,32 +20,86 @@ text_frag1 = u"""гагара арара мамалыга гагаузы тат�
 class AddBookWindow(QWidget):
     def __init__(self, parent=None):
         self.defaultSumbol = 500
+        self.passageStart = 0
         super(AddBookWindow, self).__init__(parent)
         self.setWindowFlags(Qt.Dialog | Qt.WindowSystemMenuHint)
         self.setWindowModality(Qt.WindowModal)
         self.window = loadUi("addBook.ui")
-        self.window.buttonBox.clicked.connect(self.close)
+        buttonBoxes  = self.window.buttonBox
+        self.window.connect(buttonBoxes, SIGNAL('accepted ()'), self.editBook)
+        self.window.connect(buttonBoxes, SIGNAL('rejected ()'), self.closeWindow)
         self.window.show()
 
+    def closeWindow(self):
+        print "OK"
+        self.window.close()
+
     def openFile(self, filename):
-        #print filename
+
         file = open(filename)
         data = file.read()
         file = unicode(filename)
-        (dirName, fileName1) = os.path.split(file)#извеняйте у меня кризис на названия переменных
-        #print data
+        (dirName, self.fileName1) = os.path.split(file)#извеняйте у меня кризис на названия переменных
         data1 = data.decode('utf8')
-        #self.text = unicode(data ,'utf-8')
-        self.text = re.sub("\n", " ", data1)#убераем все переводы коретки
+        data1 = re.sub("^\s+|\n|\r|\s+$", ' ', data1)
+        data1 = re.sub("^\s+|  |\s+$", " ", data1)
+        self.text = data1
         sumbol = len(data)
         self.window.lineEdit.setText(str(self.defaultSumbol))
-        self.window.fileName.setText(fileName1)
+        self.window.fileName.setText(self.fileName1)
         self.window.simbol.setText(str(sumbol))
         self.window.textEdit.setText(self.text)
-        passageInt = self.defaultSumbol//sumbol
-
+        passageInt = sumbol//self.defaultSumbol
         self.window.passage.setText(str(passageInt))
 
+    def editBook(self):
+        print "OK"
+        text = self.window.textEdit.toPlainText()
+        lenSumbol = self.window.lineEdit.text()
+        komment = self.window.koment.text()
+        text = unicode(text)
+        passageInt = len(text)//int(lenSumbol)
+        i = 0
+        y = 0
+        textPassage = ""
+        passageInt2 = 0
+        if passageInt == 0: passageInt = 1
+        if len(text)>=lenSumbol: #В случае того если у нас текст меньше чем задано
+                passageInt2 = len(text)
+                print "сиволов мало"
+        else:
+            for i in range(passageInt):
+
+                print str(self.passageStart) +"<="+ str(len(text))
+                if self.passageStart <= len(text)-int(lenSumbol)-int(lenSumbol):
+                    for y in range(0, int(lenSumbol)):
+                        #if text[self.passageStart+int(lenSumbol)+y] >= len(text)-1000: break
+                        if text[self.passageStart+int(lenSumbol)+y]==".":
+                            passageInt2 = self.passageStart+int(lenSumbol)+y+1
+                            break
+                        elif y == int(lenSumbol)-1:
+                            passageInt2 = self.passageStart+int(lenSumbol)+y+1
+                else:
+                    passageInt2=len(text)
+                    break
+                if passageInt2 == self.passageStart: passageInt2=len(text)
+                print self.passageStart
+                print passageInt2
+                textPassage = textPassage + "<passege"+str(i)+">"+text[self.passageStart:passageInt2]
+
+                self.passageStart = int(passageInt2+1)
+
+
+        textPassage = textPassage + "<passege"+str(i)+">"+text[self.passageStart:]
+        self.window.textEdit.setText(textPassage)
+        writeText = u"<filename>"+self.fileName1+"<passeges>"+str(i)+"<komment>"+komment+textPassage
+        self.saveBook(writeText)
+
+
+    def saveBook(self,text):
+        # text = text.encode('utf8')
+        open('book/'+self.fileName1,'w').write(text)
+        self.window.close()
 
 class MainWindow(QWidget):
     def __init__(self, parent=None):
@@ -130,11 +186,11 @@ class MainWindow(QWidget):
         self.window.lineEdit.setText("")
 
     def showDialog(self):
-        filename = QFileDialog.getOpenFileName(self, 'Open file', '/home')
+        filename = QFileDialog.getOpenFileName(self, 'Open file', '/home/smok')
         textBook=AddBookWindow(self)
-        filename1 = filename.decode('utf8')
+        filename1 = unicode(filename)
         textBook.openFile(filename1)
-        print filename
+        #print filename
         #textBook.text(filename)
 
 app = QApplication(sys.argv)
