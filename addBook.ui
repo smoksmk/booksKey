@@ -99,7 +99,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Отрывков:</string>
+     <string>Отрывков: </string>
     </property>
    </widget>
    <widget class="QLabel" name="passage">

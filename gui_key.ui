@@ -144,7 +144,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Лучшая скорость</string>
+     <string>Лучшая скорость </string>
     </property>
    </widget>
    <widget class="QLabel" name="label_3">
