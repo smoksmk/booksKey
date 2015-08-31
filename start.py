@@ -182,6 +182,7 @@ class MainWindow(QWidget):
         self.window = loadUi("gui_key.ui")
         self.window.main_label.setText(self.text_frag)
         self.window.lineEdit.textChanged.connect(self.line_edit_text_changed)
+        self.window.top_speed.display(self.userInfo["topSpeed"])
         #self.connect(self.menubar.openFile, SIGNAL('triggered()'), self.showDialog)
         new_book = QAction(QIcon('new.png'), u"Создать", self)
         new_book.setShortcut("Ctrl+N")
@@ -197,7 +198,7 @@ class MainWindow(QWidget):
 
         next1 = self.window.next
         next1.setShortcut('Ctrl+Right')
-        receiver1 = lambda taskType=self.userInfo[self.userInfo["defaultBook"]]: self.getFrag(self.userInfo["defaultBook"],taskType+1)
+        receiver1 = lambda taskType='next': self.getFrag(self.userInfo["defaultBook"],taskType)
         self.connect(next1, SIGNAL('clicked()'), receiver1)
 
         self.connect(test, SIGNAL('triggered()'), Users().getUserData)
@@ -211,7 +212,7 @@ class MainWindow(QWidget):
             book = QAction(QIcon('new.png'), str(self.categories[i]), self, checkable=True)
             book.setStatusTip('Открыть новый файл'+str(i))
             # book.triggered.connect(self.getFrag("5"))
-            receiver = lambda taskType=self.categories[i]: self.getFrag(taskType, self.userInfo[taskType])
+            receiver = lambda taskType=self.categories[i]: self.getFrag(taskType, 0)
             self.connect(book, SIGNAL('triggered()'), receiver)
             self.window.menu_3.addAction(book)
 
@@ -226,7 +227,7 @@ class MainWindow(QWidget):
 
     def getFrag(self, book, frag): # Получаем отрывок
         print "OK"
-        print book
+        print boo
         print frag
         global countPassegs
         print countPassegs
@@ -234,21 +235,26 @@ class MainWindow(QWidget):
         self.window.lineEdit.setFocus()
         if int(countPassegs[0]) == 0: frag = 0
         self.userInfo["defaultBook"] = book
+
         print self.userInfo.has_key(book)
         if self.userInfo.has_key(book) == False:
             print "Небыло такого значения"
             h3 = {book:0}
             self.userInfo.update(h3)
             print self.userInfo
-        print frag
-        frag = ParseBook().parseFrag(book, frag)
+        if frag == 0: frag = self.userInfo[book]
+        if frag=="next":frag = self.userInfo[book]
+        print "frag; "+str(frag)
+        fragment = ParseBook().parseFrag(book, frag)
         # Сбрасываем на начало
         self.old_text = ""
         self.word_count = 0
+        self.error_count = 0
+        self.window.error_count.display(self.error_count)
 
-        self.text_frag = frag
-        self.words = split(frag)
-        self.window.main_label.setText(frag)
+        self.text_frag = fragment
+        self.words = split(fragment)
+        self.window.main_label.setText(fragment)
 
     def line_edit_text_changed(self, text): #обработка нажатий клавиш
         self.i = len(self.old_text+text)
@@ -262,14 +268,14 @@ class MainWindow(QWidget):
         print len(self.text_frag)
         if self.text_frag[:len(self.old_text+text)] == self.old_text + self.text and len(self.old_text+text) < len(self.text_frag):#подсвечиваем букву
             self.block = False
-            self.window.main_label.setText(self.text_frag[:len(self.old_text+text)]+"<font color=red>"+self.text_frag[len(self.old_text+self.text)]+"</font>"+self.text_frag[len(self.old_text+self.text)+1:])
+            self.window.main_label.setText(self.text_frag[:len(self.old_text+text)]+"<font color=red><u>"+self.text_frag[len(self.old_text+self.text)]+"</u></font>"+self.text_frag[len(self.old_text+self.text)+1:])
         elif self.block == False:
             self.block = True
             self.error_count = self.error_count+1
             self.window.error_count.display(self.error_count)
 
 
-        print text+"=="+self.words[self.word_count] #отладка старвниваем что получили с тем что надо
+        # print text+"=="+self.words[self.word_count] #отладка старвниваем что получили с тем что надо
         if self.text == self.words[self.word_count]+" ":#стираем из стоки и заносим в переменную
             self.clearWord()
 
@@ -290,6 +296,9 @@ class MainWindow(QWidget):
         self.window.lineEdit.setEnabled(False)
         self.window.next.setFocus()
         print self.userInfo["defaultBook"]
+        if netto[:5] >= self.userInfo["topSpeed"]:
+            self.userInfo["topSpeed"] = netto[:5]
+            self.window.top_speed.display(netto[:5])
         self.userInfo[self.userInfo["defaultBook"]]+=1
         Users().writeUserData(self.userInfo["name"], self.userInfo)
 
